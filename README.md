@@ -6,6 +6,24 @@ We all know TAR. It's a great tool to archive a lot of files. You can later comp
 
 Supertar is a work in progress. Test it carefully if you want to use it in production.
 
+## Installation
+
+```
+go get github.com/marcboeker/supertar
+```
+
+And make sure, that your `$PATH` env variable includes `$GOPATH/bin`. You can add the following snippet to your `.bashrc`, `.zshrc` or whatever you are using:
+
+```
+export PATH="$PATH:$GOPATH/bin"
+```
+
+After running `source ~/.bashrc` or `source ~/.zshrc` you can run the `supertar` command:
+
+```
+supertar --help
+```
+
 ## Built-in web server? Why?
 
 Imagine you have an archive with some images and videos. They are named IMG_1234.jpg and MOV_4321.avi. You are searching for a specific image, but don't know the exact name. Just start the Supertar web-server with the archive file and you can browse the archive and click on each image or video to directly show them in your browser. This is much mor comfortable than extracting the whole archive to find what you are looking for.
