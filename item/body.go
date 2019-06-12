@@ -10,6 +10,7 @@ import (
 	"github.com/marcboeker/supertar/crypto"
 )
 
+// Body wraps all functions to write and extract the body of an item.
 type Body struct{}
 
 func (b Body) Write(dest io.Writer, src io.Reader, c *config.Config) error {
