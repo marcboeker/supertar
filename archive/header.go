@@ -73,25 +73,33 @@ func (h Header) Write(w io.Writer) error {
 
 // Read reads the header from the given fikle handler.
 func (h *Header) Read(r io.Reader) error {
-	buf := make([]byte, headerLength)
-	if _, err := r.Read(buf); err != nil {
+	hdr := make([]byte, headerLength)
+	if _, err := r.Read(hdr); err != nil {
 		return err
 	}
 
-	if !bytes.Equal(buf[0:4], magicNumber) {
+	buf := bytes.NewBuffer(hdr)
+
+	if !bytes.Equal(h.readNBytes(buf, magicNumberLength), magicNumber) {
 		return errInvalidMagicNumber
 	}
 
-	h.version = buf[4]
-	afterCompression := magicNumberLength + versionLength + compressionLength
-	h.compression = buf[5] == compressionEnabled
-	afterKDFSalt := afterCompression + kdfSaltLength
-	h.kdfSalt = buf[afterCompression:afterKDFSalt]
-	afterKeyNonce := afterKDFSalt + keyNonceLength
-	h.KeyNonce = buf[afterKDFSalt:afterKeyNonce]
-	h.Key = buf[afterKeyNonce:]
+	h.version, _ = buf.ReadByte()
+	compression, _ := buf.ReadByte()
+	h.compression = compression == compressionEnabled
+	h.kdfSalt = h.readNBytes(buf, kdfSaltLength)
+	h.KeyNonce = h.readNBytes(buf, keyNonceLength)
+	h.Key = h.readNBytes(buf, keyLength+tagLength)
 
 	return nil
+}
+
+func (h *Header) readNBytes(r io.Reader, n int) []byte {
+	buf := make([]byte, n)
+	if _, err := r.Read(buf); err != nil {
+		return nil
+	}
+	return buf
 }
 
 var (
