@@ -118,5 +118,5 @@ Supertar has a simple file format that can be read easily by your own parser. So
 
 `[0]` The magic number is always `1337`  
 `[1]` The version numer is currently `1`  
-`[2]` The compression flag is either `0` to disable compression or `1` to enable compression using Zstandard. More compression algorithms will be added later.
+`[2]` The compression flag is either `0` to disable compression or `1` to enable compression using Zstandard. More compression algorithms will be added later.  
 `[3]` Mode contains the file mode and the permission bits.
