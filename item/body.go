@@ -85,7 +85,9 @@ func (b Body) Extract(src io.Reader, dest io.Writer, chunks int64, c *config.Con
 			if err != nil {
 				return err
 			}
-			dest.Write(data)
+			if _, err := dest.Write(data); err != nil {
+				return err
+			}
 		} else {
 			if _, err := dest.Write(plaintext); err != nil {
 				return err
