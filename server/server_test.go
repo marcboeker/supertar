@@ -83,7 +83,6 @@ func (s ServerTestSuite) TestListItemsWithInvalidPath() {
 }
 
 func (s ServerTestSuite) TestStreamFound() {
-
 	router := s.server.setupRouter()
 
 	w := httptest.NewRecorder()
@@ -101,6 +100,24 @@ func (s ServerTestSuite) TestStreamNotFound() {
 	router.ServeHTTP(w, req)
 
 	s.Equal(404, w.Code)
+}
+
+func (s ServerTestSuite) TestStreamRange() {
+	router := s.server.setupRouter()
+
+	tests := map[string]string{
+		"bytes=0-7": "package",
+		"bytes=3-6": "kag",
+	}
+	for k, v := range tests {
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("GET", "/api/stream/archive/archive.go", nil)
+		req.Header.Set("Range", k)
+		router.ServeHTTP(w, req)
+
+		s.Equal(206, w.Code)
+		s.Equal(w.Body.String(), v)
+	}
 }
 
 func (s ServerTestSuite) TestServeStaticIndex() {

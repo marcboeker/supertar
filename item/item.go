@@ -53,3 +53,12 @@ func (i Item) Extract(src io.Reader, dest io.Writer, config *config.Config) erro
 	}
 	return nil
 }
+
+// ExtractRange reads the given range from an item and writes it to dest.
+func (i Item) ExtractRange(src io.ReadSeeker, dest io.Writer, start, end int, config *config.Config) error {
+	body := new(Body)
+	if err := body.ExtractRange(src, dest, start, end, i.Header.Chunks, config); err != nil {
+		return err
+	}
+	return nil
+}

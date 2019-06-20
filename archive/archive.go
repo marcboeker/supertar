@@ -354,13 +354,13 @@ func (a Archive) Extract(ch chan *item.Item, dest string) error {
 }
 
 // Stream streams an item from the archive.
-func (a Archive) Stream(item *item.Item, dest io.Writer) error {
+func (a Archive) Stream(item *item.Item, dest io.Writer, start, end int) error {
 	if _, err := a.file.Seek(item.Offset, io.SeekStart); err != nil {
 		return err
 	}
 
 	if item.Header.Size > 0 {
-		if err := item.Extract(a.file, dest, a.config); err != nil {
+		if err := item.ExtractRange(a.file, dest, start, end, a.config); err != nil {
 			return err
 		}
 	}
