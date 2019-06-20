@@ -21,6 +21,9 @@ func (b Body) Write(dest io.Writer, src io.Reader, c *config.Config) error {
 		if err != nil && err != io.EOF {
 			return err
 		}
+		if n == 0 {
+			break
+		}
 
 		seqB := make([]byte, 4)
 		binary.LittleEndian.PutUint32(seqB, uint32(seq))
@@ -41,7 +44,7 @@ func (b Body) Write(dest io.Writer, src io.Reader, c *config.Config) error {
 		dest.Write(hdr)
 		dest.Write(res)
 
-		if n <= c.ChunkSize {
+		if n < c.ChunkSize {
 			break
 		}
 
