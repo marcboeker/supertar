@@ -41,7 +41,7 @@ func (b Body) Write(dest io.Writer, src io.Reader, c *config.Config) error {
 		dest.Write(hdr)
 		dest.Write(res)
 
-		if n < c.ChunkSize {
+		if n <= c.ChunkSize {
 			break
 		}
 
