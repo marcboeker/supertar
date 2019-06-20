@@ -30,6 +30,8 @@ Imagine you have an archive with some images and videos. They are named IMG_1234
 
 ![Supertar demo](images/demo.gif)
 
+The built-in server detects the mime type and adds a streaming capability (for browser supported formats), so that you can skip in videos or audio files.
+
 TODO: Maybe we're adding a gallery feature later, to make it even simpler.
 
 ## Examples
