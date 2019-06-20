@@ -92,3 +92,64 @@ func (b Body) Extract(src io.Reader, dest io.Writer, chunks int64, c *config.Con
 
 	return nil
 }
+
+// ExtractRange extracts the given range to the destination file.
+func (b Body) ExtractRange(src io.ReadSeeker, dest io.Writer, start, end int, chunks int64, c *config.Config) error {
+	counter := 0
+	for i := int64(0); i < chunks; i++ {
+		hdr := make([]byte, 8)
+		if _, err := src.Read(hdr); err != nil {
+			return err
+		}
+
+		seq := binary.LittleEndian.Uint32(hdr[:4])
+		size := binary.LittleEndian.Uint32(hdr[4:8])
+
+		if int64(seq) != i {
+			return fmt.Errorf("chunk order incorrect: expected %d, got %d", i, seq)
+		}
+
+		if counter+c.ChunkSize >= start && counter < end {
+			buf := make([]byte, size)
+			_, err := src.Read(buf)
+			if err != nil {
+				return err
+			}
+
+			plaintext, err := c.Crypto.OpenBytes(buf, hdr)
+			if err != nil {
+				return err
+			}
+
+			startOffset := 0
+			if start > counter && start < counter+c.ChunkSize {
+				startOffset = start - counter
+			}
+
+			endOffset := c.ChunkSize
+			if counter+c.ChunkSize > end {
+				endOffset = c.ChunkSize - ((counter + c.ChunkSize) - end)
+			}
+
+			if c.Compression {
+				data, err := compress.Decompress(plaintext)
+				if err != nil {
+					return err
+				}
+				if _, err := dest.Write(data[startOffset:endOffset]); err != nil {
+					return err
+				}
+			} else {
+				if _, err := dest.Write(plaintext[startOffset:endOffset]); err != nil {
+					return err
+				}
+			}
+		} else {
+			src.Seek(int64(size), io.SeekCurrent)
+		}
+
+		counter += c.ChunkSize
+	}
+
+	return nil
+}
