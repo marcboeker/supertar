@@ -2,6 +2,7 @@ package archive
 
 import (
 	"bytes"
+	"encoding/binary"
 	"errors"
 	"io"
 )
@@ -10,12 +11,13 @@ const (
 	magicNumberLength = 4
 	versionLength     = 1
 	compressionLength = 1
+	chunkSizeLength   = 8
 	kdfSaltLength     = 16
 	keyNonceLength    = 24
 	keyLength         = 32
 	tagLength         = 16
 
-	headerLength = magicNumberLength + versionLength + compressionLength + kdfSaltLength + keyNonceLength + keyLength + tagLength
+	headerLength = magicNumberLength + versionLength + compressionLength + chunkSizeLength + kdfSaltLength + keyNonceLength + keyLength + tagLength
 
 	compressionDisabled = 0
 	compressionEnabled  = 1
@@ -31,6 +33,7 @@ var (
 type Header struct {
 	version     uint8  // versionLength
 	compression bool   // compressionLength
+	chunkSize   int    // chunkSizeLength
 	kdfSalt     []byte // kdfSaltLength
 	KeyNonce    []byte // keyNonceLength
 	Key         []byte // keyLength + tagLength
@@ -56,6 +59,12 @@ func (h Header) Write(w io.Writer) error {
 		}
 	}
 
+	buf := make([]byte, chunkSizeLength)
+	binary.LittleEndian.PutUint64(buf, uint64(h.chunkSize))
+	if _, err := w.Write(buf); err != nil {
+		return err
+	}
+
 	if _, err := w.Write(h.kdfSalt); err != nil {
 		return err
 	}
@@ -79,7 +88,6 @@ func (h *Header) Read(r io.Reader) error {
 	}
 
 	buf := bytes.NewBuffer(hdr)
-
 	if !bytes.Equal(h.readNBytes(buf, magicNumberLength), magicNumber) {
 		return errInvalidMagicNumber
 	}
@@ -87,6 +95,8 @@ func (h *Header) Read(r io.Reader) error {
 	h.version, _ = buf.ReadByte()
 	compression, _ := buf.ReadByte()
 	h.compression = compression == compressionEnabled
+	chunkSize := h.readNBytes(buf, chunkSizeLength)
+	h.chunkSize = int(binary.LittleEndian.Uint64(chunkSize))
 	h.kdfSalt = h.readNBytes(buf, kdfSaltLength)
 	h.KeyNonce = h.readNBytes(buf, keyNonceLength)
 	h.Key = h.readNBytes(buf, keyLength+tagLength)

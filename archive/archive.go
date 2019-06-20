@@ -45,6 +45,7 @@ func NewArchive(c *config.Config) (*Archive, error) {
 		}
 
 		c.Compression = arch.header.compression
+		c.ChunkSize = arch.header.chunkSize
 
 		ks := crypto.KeyStore{
 			KDFSalt:  arch.header.kdfSalt,
@@ -67,6 +68,7 @@ func NewArchive(c *config.Config) (*Archive, error) {
 		}
 
 		arch.header.compression = c.Compression
+		arch.header.chunkSize = c.ChunkSize
 		arch.header.kdfSalt = ks.KDFSalt
 		arch.header.KeyNonce = ks.KeyNonce
 		arch.header.Key = ks.Key

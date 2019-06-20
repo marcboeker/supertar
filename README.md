@@ -37,8 +37,11 @@ TODO: Maybe we're adding a gallery feature later, to make it even simpler.
 ## Examples
 
 ```
-# Create a new archive with compression
+# Create a new archive with compression and 4MB (default) chunk size
 supertar create -cf foo.star /home/cnorris
+
+# Create a new archive with compression and 16MB chunk size
+supertar create -cf foo.star --chunk-size 16777216 /home/cnorris
 
 # List all files in the archive
 supertar list -f foo.star
@@ -91,6 +94,7 @@ Supertar has a simple file format that can be read easily by your own parser. So
         -> Magic number [0] (4 bytes)
         -> Version number [1] (1 byte)
         -> Compression enabled and algorithm [2] (1 byte)
+        -> Chunk size in bytes (min. 64kb) (8 bytes)
         -> KDF salt (16 bytes)
         -> Key nonce (16 bytes)
         -> Random key + MAC (48 bytes)

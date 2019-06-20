@@ -11,6 +11,7 @@ var (
 	defaultHeader = Header{
 		version:     supertarVersion,
 		compression: true,
+		chunkSize:   1234,
 		kdfSalt:     []byte("deadbeeffoodbabe"),
 		KeyNonce:    []byte("012345678912012345678912"),
 		Key:         []byte("deadbeeffoodbabedeadbeeffoodbabe"),
@@ -33,6 +34,7 @@ func TestHeaderOK(t *testing.T) {
 
 	assert.Equal(t, defaultHeader.version, hdr.version)
 	assert.Equal(t, defaultHeader.compression, hdr.compression)
+	assert.Equal(t, defaultHeader.chunkSize, hdr.chunkSize)
 	assert.Equal(t, defaultHeader.kdfSalt, hdr.kdfSalt)
 	assert.Equal(t, defaultHeader.KeyNonce, hdr.KeyNonce)
 	assert.Equal(t, defaultHeader.Key, hdr.Key[:32])
@@ -55,7 +57,7 @@ func TestHeaderCorrupted(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.NotEqual(t, defaultHeader.version, hdr.version)
-	assert.NotEqual(t, defaultHeader.kdfSalt, hdr.kdfSalt)
+	assert.NotEqual(t, defaultHeader.chunkSize, hdr.chunkSize)
 }
 
 func TestMagicNumberCorrupted(t *testing.T) {

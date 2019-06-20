@@ -31,10 +31,12 @@ func init() {
 	RootCmd.PersistentFlags().StringVarP(&archiveFile, "file", "f", "", "archive file (*.star)")
 	RootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
 	createCmd.PersistentFlags().BoolVarP(&useCompression, "compression", "c", false, "enable compression")
+	createCmd.PersistentFlags().IntVarP(&chunkSize, "chunk-size", "", defaultChunkSize, "Chunk size in bytes")
 }
 
 const (
-	chunkSize = 1024 * 1024 * 16
+	defaultChunkSize = 1024 * 1024 * 4
+	minChunkSize     = 1024 * 64
 )
 
 var (
@@ -42,6 +44,7 @@ var (
 	archiveFile    string
 	useCompression bool
 	verbose        bool
+	chunkSize      int
 )
 
 // RootCmd is the main command that is always executed.
@@ -65,6 +68,10 @@ var RootCmd = &cobra.Command{
 			if !archiveExists(archiveFile) {
 				exitWithErr(errArchiveDoesNotExist)
 			}
+		}
+
+		if chunkSize < minChunkSize {
+			exitWithErr(errInvalidChunkSize)
 		}
 
 		password := readPassword("Password")
@@ -97,10 +104,12 @@ var RootCmd = &cobra.Command{
 }
 
 var createCmd = &cobra.Command{
-	Use:     "create",
-	Short:   "Create an archive from the given files",
-	Example: "create -cf foo_compressed.star /home/bar\ncreate -f foo_uncompressed.star /home/bar/baz.txt",
-	Args:    cobra.MinimumNArgs(1),
+	Use:   "create",
+	Short: "Create an archive from the given files",
+	Example: `create -cf foo_compressed.star /home/bar
+create -f foo_uncompressed.star /home/bar/baz.txt
+create -cf foo_uncompressed.star --chunk-size 4 /home/bar/baz.txt`,
+	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		cwd, _ := os.Getwd()
 
@@ -340,4 +349,5 @@ var (
 	errArchiveExists       = errors.New("Archive file already exist")
 	errArchiveDoesNotExist = errors.New("Archive file does not exist")
 	errPWDoNotMatch        = errors.New("Passwords do not match")
+	errInvalidChunkSize    = errors.New("Chunk size smaller than 64kb")
 )
