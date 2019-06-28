@@ -121,14 +121,14 @@ create -cf foo_uncompressed.star --chunk-size 4 /home/bar/baz.txt`,
 		var ch chan string
 		if verbose {
 			ch = make(chan string)
-		go func() {
-			for {
-				select {
-				case p := <-ch:
-					fmt.Printf("+ %s\n", p)
+			go func() {
+				for {
+					select {
+					case p := <-ch:
+						fmt.Printf("+ %s\n", p)
+					}
 				}
-			}
-		}()
+			}()
 		}
 
 		basePath := filepath.Dir(path)
@@ -233,14 +233,14 @@ var addCmd = &cobra.Command{
 		var ch chan string
 		if verbose {
 			ch = make(chan string)
-		go func() {
-			for {
-				select {
-				case p := <-ch:
-					fmt.Printf("+ %s\n", p)
+			go func() {
+				for {
+					select {
+					case p := <-ch:
+						fmt.Printf("+ %s\n", p)
+					}
 				}
-			}
-		}()
+			}()
 		}
 
 		arch.AddRecursive(basePath, path, ch)
@@ -357,4 +357,5 @@ var (
 	errArchiveDoesNotExist = errors.New("Archive file does not exist")
 	errPWDoNotMatch        = errors.New("Passwords do not match")
 	errInvalidChunkSize    = errors.New("Chunk size smaller than 64kb")
+	errInvalidPath         = errors.New("Invalid path")
 )
