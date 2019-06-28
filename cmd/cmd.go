@@ -222,7 +222,14 @@ var addCmd = &cobra.Command{
 			path = filepath.Join(cwd, path)
 		}
 
-		ch := make(chan string)
+		basePath := path
+		stat, err := os.Stat(basePath)
+		if err != nil {
+			exitWithErr(errInvalidPath)
+		}
+		if !stat.Mode().IsDir() {
+			basePath = filepath.Dir(basePath)
+		}
 		go func() {
 			if !verbose {
 				return
@@ -236,7 +243,7 @@ var addCmd = &cobra.Command{
 			}
 		}()
 
-		arch.AddRecursive(path, path, ch)
+		arch.AddRecursive(basePath, path, ch)
 	},
 }
 
