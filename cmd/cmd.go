@@ -118,12 +118,10 @@ create -cf foo_uncompressed.star --chunk-size 4 /home/bar/baz.txt`,
 			path = filepath.Join(cwd, path)
 		}
 
-		ch := make(chan string)
+		var ch chan string
+		if verbose {
+			ch = make(chan string)
 		go func() {
-			if !verbose {
-				return
-			}
-
 			for {
 				select {
 				case p := <-ch:
@@ -131,6 +129,7 @@ create -cf foo_uncompressed.star --chunk-size 4 /home/bar/baz.txt`,
 				}
 			}
 		}()
+		}
 
 		basePath := filepath.Dir(path)
 		arch.AddRecursive(basePath, path, ch)
@@ -230,11 +229,11 @@ var addCmd = &cobra.Command{
 		if !stat.Mode().IsDir() {
 			basePath = filepath.Dir(basePath)
 		}
-		go func() {
-			if !verbose {
-				return
-			}
 
+		var ch chan string
+		if verbose {
+			ch = make(chan string)
+		go func() {
 			for {
 				select {
 				case p := <-ch:
@@ -242,6 +241,7 @@ var addCmd = &cobra.Command{
 				}
 			}
 		}()
+		}
 
 		arch.AddRecursive(basePath, path, ch)
 	},
