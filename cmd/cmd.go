@@ -74,12 +74,16 @@ var RootCmd = &cobra.Command{
 			exitWithErr(errInvalidChunkSize)
 		}
 
-		password := readPassword("Password")
+		envPwd := os.Getenv("PASSWORD")
+		password := []byte(envPwd)
+		if len(password) == 0 {
+			password = readPassword("Password")
 
-		if cmd.Name() == "create" {
-			pwdRepeat := readPassword("Repeat password")
-			if !bytes.Equal(password, pwdRepeat) {
-				exitWithErr(errPWDoNotMatch)
+			if cmd.Name() == "create" {
+				pwdRepeat := readPassword("Repeat password")
+				if !bytes.Equal(password, pwdRepeat) {
+					exitWithErr(errPWDoNotMatch)
+				}
 			}
 		}
 
