@@ -5,12 +5,12 @@
         <li>
           <a href="#" @click="browse('')">Home</a>
         </li>
-        <li v-for="(p, idx) in this.cleanPath()">
+        <li v-for="(p, idx) in this.cleanPath()" v-bind:key="p">
           <a href="#" @click="browse(fullPath(idx))" v-bind:title="fullPath(idx)">{{p}}</a>
         </li>
       </ul>
     </div>
-    <List v-bind:items="this.items" :browse="browse"/>
+    <List v-bind:items="this.items" :browse="browse" />
   </div>
 </template>
 

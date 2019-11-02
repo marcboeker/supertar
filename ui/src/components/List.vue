@@ -6,9 +6,9 @@
       <th class="list__header__mtime">Last modification</th>
     </tr>
     <tr
-      v-if="item.isDir"
       class="list__item--directory"
-      v-for="(item, idx) in this.items"
+      v-for="(item, idx) in this.onlyDirs"
+      v-bind:key="idx"
       @click="browse(`${item.path}/${item.name}`)"
     >
       <td>{{item.name}}</td>
@@ -16,9 +16,9 @@
       <td>{{item.mtime}}</td>
     </tr>
     <tr
-      v-if="!item.isDir"
+      v-bind:key="idx"
       class="list__item--file"
-      v-for="(item, idx) in this.items"
+      v-for="(item, idx) in this.onlyFiles"
       @click="stream(`${item.path}/${item.name}`)"
     >
       <td>{{item.name}}</td>
@@ -33,6 +33,14 @@ export default {
   name: "List",
   props: {
     items: Array
+  },
+  computed: {
+    onlyDirs: function() {
+      return this.items.filter(i => i.isDir);
+    },
+    onlyFiles: function() {
+      return this.items.filter(i => !i.isDir);
+    }
   },
   methods: {
     stream(path) {
