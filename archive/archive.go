@@ -226,15 +226,15 @@ func (a Archive) Delete(ch chan *item.Item, pattern string) error {
 		}()
 	}
 	return a.iterateItems(func(i *item.Item) error {
-		if ch != nil {
-			ch <- i
-		}
-
 		matched, err := filepath.Match(pattern, i.Header.Path)
 		if err != nil {
 			return err
 		}
 		if matched {
+			if ch != nil {
+				ch <- i
+			}
+
 			i.Header.Deleted = 1
 			a.file.Seek(-i.Header.Len(), io.SeekCurrent)
 			i.Header.Write(a.file, a.config)
