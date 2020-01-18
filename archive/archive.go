@@ -250,6 +250,107 @@ func (a Archive) Delete(ch chan *item.Item, pattern string) error {
 	})
 }
 
+// Move moves items matched by the given pattern to its new destination.
+func (a Archive) Move(ch chan *item.Item, src, target string) error {
+	if ch != nil {
+		defer func() {
+			close(ch)
+		}()
+	}
+
+	type matchedItem struct {
+		item  *item.Item
+		start int64
+		end   int64
+	}
+
+	var matchedItems []*matchedItem
+	toIsFile := false
+	err := a.iterateItems(func(i *item.Item) error {
+		if toIsFile && target == i.Header.Path && i.Header.Type() == item.ModeRegular {
+			toIsFile = false
+		}
+
+		matched, err := filepath.Match(src, i.Header.Path)
+		if err != nil {
+			return err
+		}
+
+		start, err := a.file.Seek(0, io.SeekCurrent)
+		if err != nil {
+			return err
+		}
+		var end int64
+		if i.Header.Type() == item.ModeRegular {
+			end, err = a.skipChunks(i.Header.Chunks)
+			if err != nil {
+				return err
+			}
+		}
+
+		if matched {
+			if ch != nil {
+				ch <- i
+			}
+
+			matchedItems = append(matchedItems, &matchedItem{i, start, end})
+		}
+
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	writeFile, err := os.OpenFile(a.path, os.O_WRONLY, 0666)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		writeFile.Sync()
+		writeFile.Close()
+	}()
+
+	if _, err := writeFile.Seek(0, io.SeekEnd); err != nil {
+		return err
+	}
+
+	// If moving multiple items the destination path cannot be a file.
+	if len(matchedItems) > 1 && toIsFile {
+		return errors.New("destination path is an existing file, should be missing or directory")
+	}
+
+	for _, mi := range matchedItems {
+		if _, err := a.file.Seek(mi.item.Offset-mi.item.Header.Len(), io.SeekStart); err != nil {
+			return err
+		}
+
+		// Make copy of header
+		hdr := *mi.item.Header
+
+		mi.item.Header.Deleted = 1
+		if err := mi.item.Header.Write(a.file, a.config); err != nil {
+			return err
+		}
+
+		if len(matchedItems) > 1 {
+			// Multiple items are prefixed with the target path.
+			hdr.Path = filepath.Join(target, mi.item.Header.Path)
+		} else {
+			hdr.Path = target
+		}
+		if err := hdr.Write(writeFile, a.config); err != nil {
+			return nil
+		}
+
+		if _, err := io.CopyN(writeFile, a.file, mi.end-mi.start); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // Compact removes all entries that are marked as deleted.
 func (a Archive) Compact() error {
 	if _, err := a.file.Seek(headerLength, io.SeekStart); err != nil {

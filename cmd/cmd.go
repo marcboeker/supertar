@@ -24,6 +24,7 @@ func init() {
 	RootCmd.AddCommand(extractCmd)
 	RootCmd.AddCommand(addCmd)
 	RootCmd.AddCommand(deleteCmd)
+	RootCmd.AddCommand(moveCmd)
 	RootCmd.AddCommand(compactCmd)
 	RootCmd.AddCommand(serveCmd)
 	RootCmd.AddCommand(updatePwdCmd)
@@ -277,6 +278,41 @@ var deleteCmd = &cobra.Command{
 
 		pattern := args[0]
 		if err := arch.Delete(ch, pattern); err != nil {
+			exitWithErr(err)
+		}
+
+		wg.Wait()
+	},
+}
+
+var moveCmd = &cobra.Command{
+	Use:     "move <source pattern> <target>",
+	Short:   "Move item(s) to another path.",
+	Long:    "For a single item you have to specify the full target path. For multiple items you need to specify a prefix where all items are moved to.",
+	Example: "Single file: move -f foo.star bar/baz.txt bam/baz.txt\nMultiple files: move -f foo.star bar/* bam",
+	Args:    cobra.MinimumNArgs(2),
+	Run: func(cmd *cobra.Command, args []string) {
+		wg := sync.WaitGroup{}
+		wg.Add(1)
+
+		ch := make(chan *item.Item)
+		go func() {
+			for {
+				i, more := <-ch
+				if more {
+					if verbose {
+						fmt.Println(i.Header.ToString())
+					}
+				} else {
+					wg.Done()
+					return
+				}
+			}
+		}()
+
+		src := args[0]
+		target := args[1]
+		if err := arch.Move(ch, src, target); err != nil {
 			exitWithErr(err)
 		}
 

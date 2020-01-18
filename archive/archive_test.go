@@ -179,6 +179,58 @@ func (s *ArchiveTestSuite) TestDelete() {
 	s.Assert().False(notFound)
 }
 
+func (s *ArchiveTestSuite) TestMove() {
+	err := s.arch.AddRecursive("../", "../main.go", nil)
+	s.Assert().NoError(err)
+
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+
+	ch := make(chan *item.Item)
+	go func() {
+		for {
+			_, more := <-ch
+			if !more {
+				wg.Done()
+				return
+			}
+		}
+	}()
+
+	err = s.arch.Move(ch, "main.go", "main.foo")
+	s.Assert().NoError(err)
+	wg.Wait()
+
+	wg.Add(1)
+	oldDeleted := false
+	newFound := false
+
+	ch = make(chan *item.Item)
+	go func() {
+		for {
+			i, more := <-ch
+			if i != nil && i.Header.Path == "main.go" && i.Header.Deleted == 1 {
+				oldDeleted = true
+			}
+			if i != nil && i.Header.Path == "main.foo" {
+				newFound = true
+			}
+			if !more {
+				wg.Done()
+				return
+			}
+		}
+	}()
+
+	err = s.arch.List(ch, "")
+	s.Assert().NoError(err)
+
+	wg.Wait()
+
+	s.Assert().True(oldDeleted)
+	s.Assert().True(newFound)
+}
+
 func (s *ArchiveTestSuite) TestCompact() {
 	err := s.arch.AddRecursive("../", "../archive", nil)
 	s.Assert().NoError(err)
