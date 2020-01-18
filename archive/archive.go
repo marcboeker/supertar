@@ -263,7 +263,7 @@ func (a Archive) Compact() error {
 		lastOffset := curOffset
 		curOffset += i.Header.Len()
 
-		if i.Header.Type() == item.ModeRegular {
+		if i.Header.Type() == item.ModeRegular && i.Header.Size > 0 {
 			pos, err := a.skipChunks(i.Header.Chunks)
 			if err != nil {
 				return err
