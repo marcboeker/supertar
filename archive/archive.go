@@ -390,6 +390,10 @@ func (a Archive) Compact() error {
 	if err != nil {
 		return err
 	}
+	defer func() {
+		writeFile.Sync()
+		writeFile.Close()
+	}()
 
 	if _, err := a.file.Seek(0, io.SeekStart); err != nil {
 		return err
@@ -412,9 +416,7 @@ func (a Archive) Compact() error {
 		}
 	}
 
-	writeFile.Sync()
 	writeFile.Truncate(newSize)
-	writeFile.Close()
 
 	return nil
 }
