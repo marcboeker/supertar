@@ -2,6 +2,7 @@ package archive
 
 import (
 	"encoding/binary"
+	"errors"
 	"io"
 	"math"
 	"os"
@@ -360,7 +361,7 @@ func (a Archive) Compact() error {
 	slices := [][2]int64{}
 	curOffset := int64(headerLength)
 
-	a.iterateItems(func(i *item.Item) error {
+	err := a.iterateItems(func(i *item.Item) error {
 		lastOffset := curOffset
 		curOffset += i.Header.Len()
 
@@ -379,6 +380,9 @@ func (a Archive) Compact() error {
 
 		return nil
 	})
+	if err != nil {
+		return err
+	}
 
 	stat, err := a.file.Stat()
 	if err != nil {
