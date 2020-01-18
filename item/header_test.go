@@ -60,11 +60,11 @@ func TestSerializeToJSON(t *testing.T) {
 
 func TestToString(t *testing.T) {
 	sizes := map[string]int64{
-		"----------         2B\t0001-01-01 00:00:00\tfoo.txt": 2,
-		"----------     2.290K\t0001-01-01 00:00:00\tfoo.txt": 2345,
-		"----------    11.772M\t0001-01-01 00:00:00\tfoo.txt": 12343456,
-		"----------   142.897G\t0001-01-01 00:00:00\tfoo.txt": 153434569073,
-		"----------   139.548T\t0001-01-01 00:00:00\tfoo.txt": 153434569078399,
+		"---------- \t         2B\t0001-01-01 00:00:00\tfoo.txt": 2,
+		"---------- \t     2.290K\t0001-01-01 00:00:00\tfoo.txt": 2345,
+		"---------- \t    11.772M\t0001-01-01 00:00:00\tfoo.txt": 12343456,
+		"---------- \t   142.897G\t0001-01-01 00:00:00\tfoo.txt": 153434569073,
+		"---------- \t   139.548T\t0001-01-01 00:00:00\tfoo.txt": 153434569078399,
 	}
 
 	for k, v := range sizes {
@@ -74,6 +74,12 @@ func TestToString(t *testing.T) {
 
 	j := defaultDirHeader.ToString()
 	assert.NotNil(t, j)
-	assert.EqualValues(t, j, "drwxr-xr-x         0B\t1970-01-01 01:00:00\tfoo")
+	assert.EqualValues(t, j, "drwxr-xr-x \t         0B\t1970-01-01 01:00:00\tfoo")
+}
 
+func TestIsDeleted(t *testing.T) {
+	assert.Equal(t, defaultFileHeader.IsDeleted(), "\t")
+
+	defaultFileHeader.Deleted = 1
+	assert.Equal(t, defaultFileHeader.IsDeleted(), "(del)")
 }

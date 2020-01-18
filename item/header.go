@@ -175,7 +175,15 @@ func (h Header) ToJSON() []byte {
 
 // ToString formats the header to a string.
 func (h Header) ToString() string {
-	return fmt.Sprintf("%s%s\t%s\t%s", os.FileMode(h.Mode).String(), h.HumanSize(), h.MTime.Format("2006-01-02 15:04:05"), h.Path)
+	return fmt.Sprintf("%s %s%s\t%s\t%s", os.FileMode(h.Mode).String(), h.IsDeleted(), h.HumanSize(), h.MTime.Format("2006-01-02 15:04:05"), h.Path)
+}
+
+// IsDeleted returns a human readable flag if the item is marked for deletion.
+func (h Header) IsDeleted() string {
+	if h.Deleted == 1 {
+		return "(del)"
+	}
+	return "\t"
 }
 
 // HumanSize returns the file size in a human readable format.
