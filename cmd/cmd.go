@@ -142,9 +142,9 @@ create -cf foo_uncompressed.star --chunk-size 4 /home/bar/baz.txt`,
 }
 
 var listCmd = &cobra.Command{
-	Use:     "list",
+	Use:     "list <pattern>",
 	Short:   "List all items in the archive",
-	Example: "list -f foo.star <filter expression>\nlist -f foo.star *.txt\nlist -f foo.star tmp*",
+	Example: "list -f foo.star *.txt\nlist -f foo.star tmp*",
 	Run: func(cmd *cobra.Command, args []string) {
 		wg := sync.WaitGroup{}
 		wg.Add(1)
@@ -214,7 +214,7 @@ var extractCmd = &cobra.Command{
 }
 
 var addCmd = &cobra.Command{
-	Use:     "add",
+	Use:     "add <pattern>",
 	Short:   "Add files to the archive",
 	Example: "add -f foo.star /home/bar/baz.txt\nadd -f foo.star /home/blah",
 	Args:    cobra.MinimumNArgs(1),
@@ -253,9 +253,9 @@ var addCmd = &cobra.Command{
 }
 
 var deleteCmd = &cobra.Command{
-	Use:     "delete",
+	Use:     "delete <pattern>",
 	Short:   "Delete items from the archive",
-	Example: "delete -f foo.star <filter expression>\ndelete -f foo.star home/bar/baz.txt\ndelete -f foo.star home/bar/blah*",
+	Example: "delete -f foo.star home/bar/baz.txt\ndelete -f foo.star home/bar/blah*",
 	Args:    cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		wg := sync.WaitGroup{}
