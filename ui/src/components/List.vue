@@ -45,7 +45,7 @@ export default {
   methods: {
     stream(path) {
       window.open(
-        `http://localhost:1337/api/stream/${encodeURI(path)}`,
+        `/api/stream/${encodeURI(path)}`,
         "_blank"
       );
     },

@@ -40,7 +40,7 @@ export default {
       this.path = path.split("/");
 
       axios
-        .get(`http://localhost:1337/api/items/${encodeURI(path)}`)
+        .get(`/api/items/${encodeURI(path)}`)
         .then(response => (this.items = response.data));
     },
     cleanPath() {

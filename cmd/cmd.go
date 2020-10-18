@@ -33,11 +33,13 @@ func init() {
 	RootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
 	createCmd.PersistentFlags().BoolVarP(&useCompression, "compression", "c", false, "enable compression")
 	createCmd.PersistentFlags().IntVarP(&chunkSize, "chunk-size", "", defaultChunkSize, "Chunk size in bytes")
+	serveCmd.Flags().StringVarP(&bindAddr, "bind-addr", "", defaultBindAddr, "Bind address")
 }
 
 const (
 	defaultChunkSize = 1024 * 1024 * 4
 	minChunkSize     = 1024 * 64
+	defaultBindAddr  = "localhost:1337"
 )
 
 var (
@@ -46,6 +48,7 @@ var (
 	useCompression bool
 	verbose        bool
 	chunkSize      int
+	bindAddr       string
 )
 
 // RootCmd is the main command that is always executed.
@@ -336,8 +339,8 @@ var serveCmd = &cobra.Command{
 	Short:   "Serve serves the archive using the integrated webserver",
 	Example: "serve -f foo.star",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Open browser at http://localhost:1337/ to view archive.\nPress CTRL/CMD+C to quit...")
-		if _, err := server.Start(arch); err != nil {
+		fmt.Printf("Open browser at http://%s/ to view archive.\nPress CTRL/CMD+C to quit...\n", bindAddr)
+		if _, err := server.Start(arch, bindAddr); err != nil {
 			exitWithErr(err)
 		}
 	},

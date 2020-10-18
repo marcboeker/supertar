@@ -16,10 +16,6 @@ import (
 	"github.com/marcboeker/supertar/item"
 )
 
-const (
-	bindAddr = "localhost:1337"
-)
-
 var (
 	mutex = sync.Mutex{}
 )
@@ -40,7 +36,7 @@ type apiItem struct {
 }
 
 // Start starts the integrated webserver to enable browsing the archive.
-func Start(arch *archive.Archive) (*Server, error) {
+func Start(arch *archive.Archive, bindAddr string) (*Server, error) {
 	s := Server{
 		archive:   arch,
 		index:     map[string][]*item.Item{},
