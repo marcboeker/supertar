@@ -141,10 +141,16 @@ func (b Body) ExtractRange(src io.ReadSeeker, dest io.Writer, start, end int, ch
 				if err != nil {
 					return err
 				}
+				if endOffset < len(data) {
+					endOffset++
+				}
 				if _, err := dest.Write(data[startOffset:endOffset]); err != nil {
 					return err
 				}
 			} else {
+				if endOffset < len(plaintext) {
+					endOffset++
+				}
 				if _, err := dest.Write(plaintext[startOffset:endOffset]); err != nil {
 					return err
 				}
