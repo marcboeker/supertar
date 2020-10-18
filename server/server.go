@@ -157,9 +157,15 @@ func (s Server) streamItem(c *gin.Context) {
 	if len(rh) > 0 {
 		rh = strings.TrimPrefix(rh, "bytes=")
 		r := strings.Split(rh, "-")
-		start, _ = strconv.Atoi(r[0])
+		if start, err = strconv.Atoi(r[0]); err != nil {
+			c.AbortWithStatus(http.StatusBadRequest)
+			return
+		}
 		if len(r[1]) > 0 {
-			end, _ = strconv.Atoi(r[1])
+			if end, err = strconv.Atoi(r[1]); err != nil {
+				c.AbortWithStatus(http.StatusBadRequest)
+				return
+			}
 		}
 
 		if start > end {
