@@ -106,8 +106,8 @@ func (s ServerTestSuite) TestStreamRange() {
 	router := s.server.setupRouter()
 
 	tests := map[string]string{
-		"bytes=0-7": "package",
-		"bytes=3-6": "kag",
+		"bytes=0-6": "package",
+		"bytes=3-5": "kag",
 	}
 	for k, v := range tests {
 		w := httptest.NewRecorder()

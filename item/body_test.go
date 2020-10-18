@@ -52,7 +52,7 @@ func TestWriteReadPartialBody(t *testing.T) {
 
 	fh.Seek(0, io.SeekStart)
 
-	err = b.ExtractRange(fh, io.Writer(out), 0, 3, 1, &c)
+	err = b.ExtractRange(fh, io.Writer(out), 0, 2, 1, &c)
 	assert.NoError(t, err)
 
 	assert.EqualValues(t, "eek", out.Bytes())
