@@ -9,7 +9,7 @@ Supertar is a work in progress. Test it carefully if you want to use it in produ
 ## Installation
 
 ```
-go get github.com/marcboeker/supertar
+go install github.com/marcboeker/supertar@latest
 ```
 
 And make sure, that your `$PATH` env variable includes `$GOPATH/bin`. You can add the following snippet to your `.bashrc`, `.zshrc` or whatever you are using:
@@ -67,7 +67,7 @@ supertar update-password -f foo.star
 
 ## Wait, what? How does it work?
 
-Supertar compresses and encrypts every item on its own and then appends it to the archive. Searching for a file iterates over the archive and jumps from item header to item header to skip the file body. This enables super fast listing and extracting of files. 
+Supertar compresses and encrypts every item on its own and then appends it to the archive. Searching for a file iterates over the archive and jumps from item header to item header to skip the file body. This enables super fast listing and extracting of files.
 
 If you want to add one or more files, Supertar appends a compressed and encrypted version of the file at the end of the archive.
 Deleting a file toggles the delete flag in the appropriate header for the given file. To reclaim space, Supertar offers a compact command, to remove all deleted items from the archive file.
@@ -80,7 +80,7 @@ Supertar uses Zstandard (level 5) for compression and Chacha20+Poly1305 for AEAD
 
 When an archive is created, a random 256 bit key is generated using `crypto.rand`. This key is the encrypted with Chacha20 using another key, that is derived from the users password using Argon2id and a generated salt. The key is also authenticated using Poly1305.
 
-Argon2id is used with the following parameters time=1, memory=64mb and 4 threads. 
+Argon2id is used with the following parameters time=1, memory=64mb and 4 threads.
 
 This enables the user to change the password of an archive without reencrypting it.
 
@@ -116,7 +116,7 @@ Supertar has a simple file format that can be read easily by your own parser. So
                     -> Compressed and encrypted item (n bytes)
 ```
 
-`[0]` The magic number is always `1337`  
-`[1]` The version numer is currently `1`  
-`[2]` The compression flag is either `0` to disable compression or `1` to enable compression using Zstandard. More compression algorithms will be added later.  
+`[0]` The magic number is always `1337`
+`[1]` The version numer is currently `1`
+`[2]` The compression flag is either `0` to disable compression or `1` to enable compression using Zstandard. More compression algorithms will be added later.
 `[3]` Mode contains the file mode and the permission bits.
